@@ -37,16 +37,23 @@ jobs:
         run: |
           mkdir -p android-offline/app/src/main/assets
           cp 'Synyp_jetekshisinin_cifrly_komekshisi_FINAL_WORKING (3).html' android-offline/app/src/main/assets/index.html
+          python3 - <<'PY'
+          from pathlib import Path
+          p = Path('android-offline/app/src/main/assets/index.html')
+          s = p.read_text(encoding='utf-8')
+          s = s.replace('structuredClone(defaultData)', 'JSON.parse(JSON.stringify(defaultData))')
+          p.write_text(s, encoding='utf-8')
+          PY
 
       - name: Build debug APK
         run: gradle -p android-offline assembleDebug --stacktrace
 
       - name: Rename APK
-        run: cp android-offline/app/build/outputs/apk/debug/app-debug.apk Synyp_Komekshi_Offline.apk
+        run: cp android-offline/app/build/outputs/apk/debug/app-debug.apk Synyp_Komekshi_Offline_v1.1.apk
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
-          name: Synyp-Komekshi-Offline-APK
-          path: Synyp_Komekshi_Offline.apk
+          name: Synyp-Komekshi-Offline-v1.1-APK
+          path: Synyp_Komekshi_Offline_v1.1.apk
           if-no-files-found: error
