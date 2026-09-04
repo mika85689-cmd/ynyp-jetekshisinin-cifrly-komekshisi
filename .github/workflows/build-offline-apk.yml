@@ -37,11 +37,16 @@ jobs:
         run: |
           mkdir -p android-offline/app/src/main/assets
           cp 'Synyp_jetekshisinin_cifrly_komekshisi_FINAL_WORKING (3).html' android-offline/app/src/main/assets/index.html
+          curl -L --fail --retry 3 'https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js' -o android-offline/app/src/main/assets/xlsx.full.min.js
+          curl -L --fail --retry 3 'https://cdn.jsdelivr.net/npm/mammoth@1.8.0/mammoth.browser.min.js' -o android-offline/app/src/main/assets/mammoth.browser.min.js
           python3 - <<'PY'
           from pathlib import Path
           p = Path('android-offline/app/src/main/assets/index.html')
           s = p.read_text(encoding='utf-8')
-          s = s.replace('structuredClone(defaultData)', 'JSON.parse(JSON.stringify(defaultData))')
+          s = s.replace('https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js', 'xlsx.full.min.js')
+          s = s.replace('https://cdn.jsdelivr.net/npm/mammoth@1.8.0/mammoth.browser.min.js', 'mammoth.browser.min.js')
+          s = s.replace('</head>', '<script src="compat.js"></script>\n</head>', 1)
+          s = s.replace('</body>', '<script src="app_patch.js"></script>\n</body>', 1)
           p.write_text(s, encoding='utf-8')
           PY
 
@@ -49,11 +54,11 @@ jobs:
         run: gradle -p android-offline assembleDebug --stacktrace
 
       - name: Rename APK
-        run: cp android-offline/app/build/outputs/apk/debug/app-debug.apk Synyp_Komekshi_Offline_v1.1.apk
+        run: cp android-offline/app/build/outputs/apk/debug/app-debug.apk Synyp_Komekshi_Offline_v1.2.apk
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
-          name: Synyp-Komekshi-Offline-v1.1-APK
-          path: Synyp_Komekshi_Offline_v1.1.apk
+          name: Synyp-Komekshi-Offline-v1.2-APK
+          path: Synyp_Komekshi_Offline_v1.2.apk
           if-no-files-found: error
